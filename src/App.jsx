@@ -1,19 +1,17 @@
-import { useState } from 'react'
-import './App.css'
-import AppRoutes from './Routes/route';
+import { useState } from "react";
+import AppRoutes from "./Routes/route";
 
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./App.css";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = useState(0);
 
   return (
-    <>
-      <div>
-        <AppRoutes/>
-      </div>
-      
-    </>
-  )
+    <div className="bg-dark text-light">
+      <AppRoutes />
+    </div>
+  );
 }
 
-export default App
+export default App;
