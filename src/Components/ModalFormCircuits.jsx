@@ -1,47 +1,119 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { Modal, Button, Form, Row, Col } from "react-bootstrap";
-// Asumo que tu helper clientAxios ya está configurado para hacer llamadas
 import clientAxios from "../helpers/axios.helpers";
 
-export default function ModalFormCircuits({ show, handleClose, onDataSaved }) {
-  // 1. Estados para los datos y el control de carga
+const mockSupervisors = [
+  { id_supervisor: "", apeyNombre: "Seleccione un Supervisor" },
+];
+
+export default function ModalFormCircuits({
+  show,
+  handleClose,
+  onSave,
+  circuitToEdit,
+  onUpdate,
+}) {
+  const isEditing = !!circuitToEdit;
+
   const [circuito, setCircuito] = useState({
     nombre: "",
     descripcion: "",
+    id_supervisor: "",
   });
-  const [loading, setLoading] = useState(false); // Estado de carga para el botón
+  const [supervisores, setSupervisores] = useState(mockSupervisors);
+  const [loading, setLoading] = useState(false);
+  const [loadingSup, setLoadingSup] = useState(false);
 
-  // Función para manejar el cambio en cualquier campo
+  useEffect(() => {
+    if (show) {
+      fetchSupervisors();
+      if (isEditing) {
+        setCircuito({
+          nombre: circuitToEdit.nombre || "",
+          descripcion: circuitToEdit.descripcion || "",
+          id_supervisor: circuitToEdit.id_supervisor || "",
+        });
+      } else {
+        setCircuito({ nombre: "", descripcion: "", id_supervisor: "" });
+      }
+    }
+  }, [show, isEditing, circuitToEdit]);
+
+  const fetchSupervisors = async () => {
+    setLoadingSup(true);
+    try {
+      const { data } = await clientAxios.get("/supervisores");
+      const initialOption = {
+        id_supervisor: "",
+        apeyNombre: "--- No Asignado / Seleccionar ---",
+      };
+      setSupervisores([initialOption, ...(data || [])]);
+    } catch (error) {
+      console.error("Error al obtener supervisores:", error);
+      setSupervisores(mockSupervisors);
+    } finally {
+      setLoadingSup(false);
+    }
+  };
+
   const handleChange = (e) => {
-    // Uso del spread operator para mantener las otras propiedades del objeto 'circuito'
+    const { id, value } = e.target;
+    let key =
+      id === "formNombre"
+        ? "nombre"
+        : id === "formDescripcion"
+        ? "descripcion"
+        : "id_supervisor";
+
+    let val =
+      key === "id_supervisor" ? (value === "" ? null : parseInt(value)) : value;
+
     setCircuito({
       ...circuito,
-      [e.target.id === "formNombre" ? "nombre" : "descripcion"]: e.target.value,
+      [key]: val,
     });
   };
 
-  // 2. Función Asíncrona para manejar el POST con Axios
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true); // Activa el estado de carga
+    setLoading(true);
 
     try {
-      // Reemplaza '/api/circuitos' con tu endpoint real
-      const response = await clientAxios.post("/circuitos", circuito);
+      const payload = {
+        ...circuito,
+        id_supervisor: circuito.id_supervisor || null,
+      };
 
-      console.log("Circuito Creado:", response.data);
+      let response;
+      if (isEditing) {
+        const url = `/circuitos/${circuitToEdit.id_circuito}`;
+        response = await clientAxios.put(url, payload);
 
-      if (onDataSaved) {
-        onDataSaved(response.data);
+        if (onUpdate) {
+          onUpdate(response.data);
+        }
+      } else {
+        response = await clientAxios.post("/circuitos", payload);
+
+        if (onSave) {
+          onSave(response.data);
+        }
       }
 
-      setCircuito({ nombre: "", descripcion: "" });
+      setCircuito({ nombre: "", descripcion: "", id_supervisor: "" });
       handleClose();
     } catch (error) {
-      console.error("Error al crear el circuito:", error);
-      alert("Error al guardar el circuito. Revisa la consola.");
+      console.error(
+        `Error al ${isEditing ? "editar" : "crear"} el circuito:`,
+        error
+      );
+      alert(
+        `Error al guardar el circuito. Revisa la consola. ${
+          error.response?.data?.message || ""
+        }`
+      );
     } finally {
-      setLoading(false); // Desactiva el estado de carga, independientemente del resultado
+      setLoading(false);
     }
   };
 
@@ -54,13 +126,16 @@ export default function ModalFormCircuits({ show, handleClose, onDataSaved }) {
       keyboard={false}
       dialogClassName="modal-dark"
     >
-      <Modal.Header closeButton className="bg-secondary text-light border-0">
-        <Modal.Title>Crear Nuevo Circuito</Modal.Title>
+      <Modal.Header closeButton className="bg-light text-dark border-0">
+        <Modal.Title>
+          {isEditing
+            ? `✏️ Editar Circuito: ${circuitToEdit?.nombre}`
+            : "➕ Crear Nuevo Circuito"}
+        </Modal.Title>
       </Modal.Header>
 
-      <Modal.Body className="bg-secondary text-light">
+      <Modal.Body className="bg-light text-dark">
         <Form onSubmit={handleSubmit}>
-          {/* Campo: Nombre del Circuito */}
           <Form.Group as={Row} className="mb-3" controlId="formNombre">
             <Form.Label column sm="3">
               Nombre
@@ -70,15 +145,13 @@ export default function ModalFormCircuits({ show, handleClose, onDataSaved }) {
                 type="text"
                 placeholder="Ej: Circuito Zona Norte"
                 value={circuito.nombre}
-                // Corregido: Llamada a handleChange
                 onChange={handleChange}
                 required
-                className="bg-dark text-light border-secondary"
+                className="bg-light text-dark border-secondary"
               />
             </Col>
           </Form.Group>
 
-          {/* Campo: Descripción del Circuito */}
           <Form.Group as={Row} className="mb-3" controlId="formDescripcion">
             <Form.Label column sm="3">
               Descripción
@@ -89,14 +162,41 @@ export default function ModalFormCircuits({ show, handleClose, onDataSaved }) {
                 rows={3}
                 placeholder="Detalles geográficos o administrativos del circuito."
                 value={circuito.descripcion}
-                // Corregido: Llamada a handleChange
                 onChange={handleChange}
-                className="bg-dark text-light border-secondary"
+                className="bg-light text-dark border-secondary"
               />
             </Col>
           </Form.Group>
 
-          {/* Pie del formulario (Botón de Enviar) */}
+          <Form.Group as={Row} className="mb-3" controlId="formSupervisor">
+            <Form.Label column sm="3">
+              Supervisor
+            </Form.Label>
+            <Col sm="9">
+              <Form.Select
+                value={
+                  circuito.id_supervisor === null ? "" : circuito.id_supervisor
+                }
+                onChange={handleChange}
+                disabled={loadingSup || loading}
+                className="bg-light text-dark border-secondary"
+              >
+                {loadingSup ? (
+                  <option value="">Cargando supervisores...</option>
+                ) : (
+                  supervisores.map((supervisor) => (
+                    <option
+                      key={supervisor.id_supervisor || ""}
+                      value={supervisor.id_supervisor || ""}
+                    >
+                      {supervisor.apeyNombre}
+                    </option>
+                  ))
+                )}
+              </Form.Select>
+            </Col>
+          </Form.Group>
+
           <div className="d-flex justify-content-end pt-3">
             <Button
               variant="secondary"
@@ -109,11 +209,13 @@ export default function ModalFormCircuits({ show, handleClose, onDataSaved }) {
             <Button
               variant="primary"
               type="submit"
-              // Deshabilitado mientras carga y el type="submit" llama a handleSubmit
-              disabled={loading}
+              disabled={loading || circuito.nombre.trim() === ""}
             >
-              {/* Muestra un texto diferente mientras se carga */}
-              {loading ? "Guardando..." : "Guardar Circuito"}
+              {loading
+                ? "Guardando..."
+                : isEditing
+                ? "Guardar Cambios"
+                : "Guardar Circuito"}
             </Button>
           </div>
         </Form>
