@@ -25,7 +25,8 @@ import ModalFormDepartamentos from "../Components/ModalFromDepartamentos";
 
 const getDepartamentos = async () => {
   try {
-    const { data } = await clientAxios.get("/departamentos"); 
+    const { data } = await clientAxios.get("/departamentos");
+    return data;
   } catch (error) {
     console.error("Error al obtener departamentos de API:", error);
     return [];
@@ -34,7 +35,7 @@ const getDepartamentos = async () => {
 
 const getCircuitos = async () => {
   try {
-    const { data } = await clientAxios.get("/circuitos"); 
+    const { data } = await clientAxios.get("/circuitos");
     return data || [];
   } catch (error) {
     console.error("Error al obtener circuitos de API:", error);
@@ -74,7 +75,6 @@ export default function DepartamentosPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  // 🎯 Se mantiene para pasar al Modal y hacer el join después de guardar
   const [circuitosData, setCircuitosData] = useState([]);
   const [departamentoAEditar, setDepartamentoAEditar] = useState(null);
   const [refreshFlag, setRefreshFlag] = useState(false);
@@ -91,6 +91,7 @@ export default function DepartamentosPage() {
       setCircuitosData(circuitosList);
 
       const res = getDepartamentosConCircuito(departamentosData, circuitosList);
+      console.log(res);
 
       setDepartamentos(res);
     } catch (error) {
@@ -104,7 +105,6 @@ export default function DepartamentosPage() {
     fetchDataCompletaDepartamentos();
   }, [refreshFlag]);
 
-
   const handleShow = () => {
     setDepartamentoAEditar(null);
     setShowModal(true);
@@ -115,12 +115,7 @@ export default function DepartamentosPage() {
     setDepartamentoAEditar(null);
   };
 
-  const handleAddDepartamento = (newDepartamentoData) => {
-    const combinedNewDepartamento = getDepartamentosConCircuito(
-      [newDepartamentoData],
-      circuitosData
-    )[0];
-
+  const handleAddDepartamento = () => {
     setRefreshFlag((prev) => !prev);
   };
 
@@ -157,15 +152,13 @@ export default function DepartamentosPage() {
 
   const filteredDepartamentos = departamentos.filter(
     (departamento) =>
-      (departamento.nombre || "") 
+      (departamento.nombre || "")
         .toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
-      (departamento.nombre_circuito || "") 
+      (departamento.nombre_circuito || "")
         .toLowerCase()
         .includes(searchTerm.toLowerCase())
   );
-
- 
 
   return (
     <Container
@@ -174,7 +167,6 @@ export default function DepartamentosPage() {
       className="min-vh-100 py-5"
     >
       <Container style={{ maxWidth: "1200px" }}>
-        
         <Row className="mb-4 d-flex align-items-center">
           <Col md={8}>
             <h1 className="fw-bold mb-1" style={{ color: COLORS.textHeader }}>
@@ -253,7 +245,6 @@ export default function DepartamentosPage() {
                 </tr>
               </thead>
               <tbody>
-             
                 {isLoading ? (
                   <tr>
                     <td colSpan="4" className="text-center py-5">
@@ -346,14 +337,13 @@ export default function DepartamentosPage() {
         </Card>
       </Container>
 
-      {/* 🎯 Modal del Formulario */}
       <ModalFormDepartamentos
         show={showModal}
         handleClose={handleClose}
         onSave={handleAddDepartamento}
         departamentoToEdit={departamentoAEditar}
         onUpdate={handleUpdateDepartamento}
-        circuitosData={circuitosData} 
+        circuitosData={circuitosData}
       />
     </Container>
   );
