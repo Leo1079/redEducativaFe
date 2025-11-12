@@ -11,7 +11,7 @@ import {
   Modal, // Se mantiene por si se usa en otros lados, aunque no directamente para el formulario
 } from "react-bootstrap";
 import { FaSearch, FaPlus, FaEdit, FaTrashAlt, FaUser } from "react-icons/fa";
-import COLORS from "./ColoresHome"; 
+import COLORS from "./ColoresHome";
 import clientAxios from "../helpers/axios.helpers";
 import ModalFormCircuits from "../Components/ModalFormCircuits";
 
@@ -152,9 +152,9 @@ export default function CircuitosPage() {
     <Container
       fluid
       style={{ backgroundColor: COLORS.bgLight }}
-      className="min-vh-100 py-5"
+      className="min-vh-100 "
     >
-      <Container style={{ maxWidth: "1200px" }}>
+      <Container style={{ maxWidth: "1200px" }} className="py-5">
         {/* Encabezado y Botón Agregar */}
         <Row className="mb-4 d-flex align-items-center">
           <Col md={8}>

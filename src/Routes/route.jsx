@@ -7,6 +7,7 @@ import Localidades from "../pages/Localidades";
 import Instituciones from "../pages/Instituciones";
 import Supervisores from "../pages/Supervisores";
 import NavbarC from "../Components/NavbarC";
+import OfertasFormatPage from "../pages/ofertasFormativas";
 
 export default function AppRoutes() {
   return (
@@ -20,6 +21,7 @@ export default function AppRoutes() {
         <Route path="/localidades" element={<Localidades />} />
         <Route path="/instituciones" element={<Instituciones />} />
         <Route path="/supervisores" element={<Supervisores />} />
+        <Route path="/ofertasFormativas" element={<OfertasFormatPage />} />
       </Routes>
     </>
   );

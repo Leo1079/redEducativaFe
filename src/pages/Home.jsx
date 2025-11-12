@@ -11,6 +11,7 @@ import {
   FaHashtag,
   FaMapMarkedAlt,
 } from "react-icons/fa";
+import { GrWorkshop } from "react-icons/gr";
 
 import COLORS from "./ColoresHome";
 
@@ -107,6 +108,15 @@ export default function Home() {
       iconColor: COLORS.primaryDark,
       iconBg: COLORS.primaryDark + "1A",
     },
+    {
+      title: "Ofertas Formativas",
+      icon: GrWorkshop,
+      path: "/ofertasFormativas",
+      description: "Visualiza todas las ofertas formativas",
+      count: moduleStats.supervisores,
+      iconColor: COLORS.primaryDark,
+      iconBg: COLORS.primaryDark + "1A",
+    },
   ];
 
   // Estructura de las ACCIONES RÁPIDAS - AHORA CON COLORES ESPECÍFICOS
@@ -164,7 +174,9 @@ export default function Home() {
         }}
       >
         <Container style={{ maxWidth: "1200px" }}>
-          <h1 className="display-4 fw-bold mb-3">Red Educativa</h1>
+          <h1 className="display-4 fw-bold mb-3">
+            Red Educativa-Formacion Profesional
+          </h1>
           <p className="lead mb-4">
             Sistema integral de gestión para circuitos, instituciones y
             supervisores educativos

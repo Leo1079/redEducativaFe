@@ -1,6 +1,7 @@
 import { Navbar, Container, Nav } from "react-bootstrap";
 import { FaHome, FaRoute, FaCity, FaBuilding, FaUserTie } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
+import { GrWorkshop } from "react-icons/gr";
 
 // Paleta de Colores
 const COLORS = {
@@ -22,10 +23,15 @@ export default function NavbarC() {
     { name: "Localidades", path: "/localidades", icon: FaCity },
     { name: "Instituciones", path: "/instituciones", icon: FaBuilding },
     { name: "Supervisores", path: "/supervisores", icon: FaUserTie },
+    {
+      name: "Ofertas Formativas",
+      path: "/ofertasFormativas",
+      icon: GrWorkshop,
+    },
   ];
 
   return (
-    <Navbar bg="white" expand="lg" className="shadow-sm py-3">
+    <Navbar bg="white" expand="lg" className="shadow-sm py-3 ">
       <Container>
         {/* Nombre del Sistema */}
         <Navbar.Brand
